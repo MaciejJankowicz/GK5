@@ -126,6 +126,10 @@ GLfloat light_position[4] =
 {
 	0.0,0.0,2.0,0.0
 };
+GLfloat spotLight_position[4] =
+{
+	0.0,0.0,2.0,1.0
+};
 
 // kąty obrotu kierunku źródła światła
 GLfloat light_rotatex = 0.0;
@@ -275,13 +279,15 @@ void DisplayScene()
 	// obroty kierunku źródła światła - klawisze kursora
 	glRotatef(light_rotatex, 1.0, 0, 0);
 	glRotatef(light_rotatey, 0, 1.0, 0);
-
-	// ustalenie kierunku źródła światła
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-
+	
 	//
 	if (isSpot)
 	{
+		spotLight_position[0] = light_position[0];
+		spotLight_position[1] = light_position[1];
+		spotLight_position[2] = light_position[2];
+		spotLight_position[3] = 1.0f;
+		glLightfv(GL_LIGHT0, GL_POSITION, spotLight_position);
 		// ustalenie kierunku reflektora
 		glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
 
@@ -299,6 +305,11 @@ void DisplayScene()
 
 		// przywrócenie zmiennych stanu związanych z oświetleniem sceny
 		glPopAttrib();
+	}
+	else
+	{
+		// ustalenie kierunku źródła światła
+		glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 	}
 
 	//
