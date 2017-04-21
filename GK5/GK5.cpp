@@ -413,60 +413,156 @@ void DisplayScene()
 
 		glBegin(GL_TRIANGLES);
 
-		// Podstawa piramidy -trzy trójkąty
+		// generowanie obiektu gładkiego - jeden uśredniony
+		// wektor normalny na wierzchołek
+		if (isSmooth)
+			for (int i = 0; i < 8; i++)
+			{
+				// obliczanie wektora normalnego dla pierwszego wierzchołka
+				GLfloat n[3];
+				n[0] = n[1] = n[2] = 0.0;
 
-		glNormal3f(0.0f, -1.0f, 0.0f);
+				// wyszukanie wszystkich ścian posiadających bie¿ący wierzchołek
+				for (int j = 0; j < 8; j++)
+					if (3 * triangles[3 * i + 0] == 3 * triangles[3 * j + 0] ||
+						3 * triangles[3 * i + 0] == 3 * triangles[3 * j + 1] ||
+						3 * triangles[3 * i + 0] == 3 * triangles[3 * j + 2])
+					{
+						// dodawanie wektorów normalnych poszczególnych ścian
+						GLfloat nv[3];
+						Normal(nv, j);
+						n[0] += nv[0];
+						n[1] += nv[1];
+						n[2] += nv[2];
+					}
 
-		glVertex3fv(vCorners[2]);
-		glVertex3fv(vCorners[4]);
-		glVertex3fv(vCorners[1]);
+				// uśredniony wektor normalny jest normalizowany tylko, gdy biblioteka
+				// obsługuje automatyczne skalowania jednostkowych wektorów normalnych
+				if (rescale_normal == true)
+					Normalize(n);
+				glNormal3fv(n);
+				glVertex3fv(&vertex[3 * triangles[3 * i + 0]]);
 
-		glVertex3fv(vCorners[2]);
-		glVertex3fv(vCorners[3]);
-		glVertex3fv(vCorners[4]);
+				// obliczanie wektora normalnego dla drugiego wierzchołka
+				n[0] = n[1] = n[2] = 0.0;
 
-		glVertex3fv(vCorners[1]);
-		glVertex3fv(vCorners[4]);
-		glVertex3fv(vCorners[5]);
+				// wyszukanie wszystkich ścian posiadających bie¿ący wierzchołek
+				for (int j = 0; j < 8; j++)
+					if (3 * triangles[3 * i + 1] == 3 * triangles[3 * j + 0] ||
+						3 * triangles[3 * i + 1] == 3 * triangles[3 * j + 1] ||
+						3 * triangles[3 * i + 1] == 3 * triangles[3 * j + 2])
+					{
+						// dodawanie wektorów normalnych poszczególnych ścian
+						GLfloat nv[3];
+						Normal(nv, j);
+						n[0] += nv[0];
+						n[1] += nv[1];
+						n[2] += nv[2];
+					}
+
+				// uśredniony wektor normalny jest normalizowany tylko, gdy biblioteka
+				// obsługuje automatyczne skalowania jednostkowych wektorów normalnych
+				if (rescale_normal == true)
+					Normalize(n);
+				glNormal3fv(n);
+				glVertex3fv(&vertex[3 * triangles[3 * i + 1]]);
+
+				// obliczanie wektora normalnego dla trzeciego wierzchołka
+				n[0] = n[1] = n[2] = 0.0;
+
+				// wyszukanie wszystkich ścian posiadających bie¿ący wierzchołek
+				for (int j = 0; j < 8; j++)
+					if (3 * triangles[3 * i + 2] == 3 * triangles[3 * j + 0] ||
+						3 * triangles[3 * i + 2] == 3 * triangles[3 * j + 1] ||
+						3 * triangles[3 * i + 2] == 3 * triangles[3 * j + 2])
+					{
+						// dodawanie wektorów normalnych poszczególnych ścian
+						GLfloat nv[3];
+						Normal(nv, j);
+						n[0] += nv[0];
+						n[1] += nv[1];
+						n[2] += nv[2];
+					}
+
+				// uśredniony wektor normalny jest normalizowany tylko, gdy biblioteka
+				// obsługuje automatyczne skalowania jednostkowych wektorów normalnych
+				if (rescale_normal == true)
+					Normalize(n);
+				glNormal3fv(n);
+				glVertex3fv(&vertex[3 * triangles[3 * i + 2]]);
+			}
+		else
+
+			// generowanie obiektu "płaskiego" - jeden wektor normalny na ścianę
+			for (int i = 0; i < 8; i++)
+			{
+				GLfloat n[3];
+				Normal(n, i);
+
+				// uśredniony wektor normalny jest normalizowany tylko, gdy biblioteka
+				// obsługuje automatyczne skalowania jednostkowych wektorów normalnych
+				if (rescale_normal == true)
+					Normalize(n);
+				glNormal3fv(n);
+				glVertex3fv(&vertex[3 * triangles[3 * i + 0]]);
+				glVertex3fv(&vertex[3 * triangles[3 * i + 1]]);
+				glVertex3fv(&vertex[3 * triangles[3 * i + 2]]);
+			}
+
+		/*// Podstawa piramidy -trzy trójkąty
+
+		//glNormal3f(0.0f, -1.0f, 0.0f);
+
+		//glVertex3fv(vCorners[2]);
+		//glVertex3fv(vCorners[4]);
+		//glVertex3fv(vCorners[1]);
+
+		//glVertex3fv(vCorners[2]);
+		//glVertex3fv(vCorners[3]);
+		//glVertex3fv(vCorners[4]);
+
+		//glVertex3fv(vCorners[1]);
+		//glVertex3fv(vCorners[4]);
+		//glVertex3fv(vCorners[5]);
 
 
-		// Przednia strona 3 4
-		gltGetNormalVector(vCorners[0], vCorners[4], vCorners[3], vNormal);
-		glNormal3fv(vNormal);
-		glVertex3fv(vCorners[0]);
-		glVertex3fv(vCorners[4]);
-		glVertex3fv(vCorners[3]);
+		//// Przednia strona 3 4
+		//gltGetNormalVector(vCorners[0], vCorners[4], vCorners[3], vNormal);
+		//glNormal3fv(vNormal);
+		//glVertex3fv(vCorners[0]);
+		//glVertex3fv(vCorners[4]);
+		//glVertex3fv(vCorners[3]);
 
-		// 1 2
-		gltGetNormalVector(vCorners[0], vCorners[2], vCorners[1], vNormal);
-		glNormal3fv(vNormal);
-		glVertex3fv(vCorners[0]);
-		glVertex3fv(vCorners[2]);
-		glVertex3fv(vCorners[1]);
+		//// 1 2
+		//gltGetNormalVector(vCorners[0], vCorners[2], vCorners[1], vNormal);
+		//glNormal3fv(vNormal);
+		//glVertex3fv(vCorners[0]);
+		//glVertex3fv(vCorners[2]);
+		//glVertex3fv(vCorners[1]);
 
-		// Prawa strona 2 3
-		gltGetNormalVector(vCorners[0], vCorners[3], vCorners[2], vNormal);
-		glNormal3fv(vNormal);
-		glVertex3fv(vCorners[0]);
-		glVertex3fv(vCorners[3]);
-		glVertex3fv(vCorners[2]);
+		//// Prawa strona 2 3
+		//gltGetNormalVector(vCorners[0], vCorners[3], vCorners[2], vNormal);
+		//glNormal3fv(vNormal);
+		//glVertex3fv(vCorners[0]);
+		//glVertex3fv(vCorners[3]);
+		//glVertex3fv(vCorners[2]);
 
-		// 4 5
-		gltGetNormalVector(vCorners[0], vCorners[5], vCorners[4], vNormal);
-		glNormal3fv(vNormal);
-		glVertex3fv(vCorners[0]);
-		glVertex3fv(vCorners[5]);
-		glVertex3fv(vCorners[4]);
+		//// 4 5
+		//gltGetNormalVector(vCorners[0], vCorners[5], vCorners[4], vNormal);
+		//glNormal3fv(vNormal);
+		//glVertex3fv(vCorners[0]);
+		//glVertex3fv(vCorners[5]);
+		//glVertex3fv(vCorners[4]);
 
-		// 5 1
+		//// 5 1
 
-		gltGetNormalVector(vCorners[0], vCorners[1], vCorners[5], vNormal);
-		glNormal3fv(vNormal);
-		glVertex3fv(vCorners[0]);
-		glVertex3fv(vCorners[1]);
-		glVertex3fv(vCorners[5]);
+		//gltGetNormalVector(vCorners[0], vCorners[1], vCorners[5], vNormal);
+		//glNormal3fv(vNormal);
+		//glVertex3fv(vCorners[0]);
+		//glVertex3fv(vCorners[1]);
+		//glVertex3fv(vCorners[5]);
 
-		//
+		*///
 		glEnd();
 		break;
 
@@ -696,45 +792,45 @@ void SpecialKeys(int key, int x, int y)
 {
 	switch (key)
 	{
-	//	// kursor w lewo
-	//case GLUT_KEY_LEFT:
-	//	light_rotatey -= 5;
-	//	break;
-
-	//	// kursor w prawo
-	//case GLUT_KEY_RIGHT:
-	//	light_rotatey += 5;
-	//	break;
-
-	//	// kursor w dół
-	//case GLUT_KEY_DOWN:
-	//	light_rotatex += 5;
-	//	break;
-
-	//	// kursor w górę
-	//case GLUT_KEY_UP:
-	//	light_rotatex -= 5;
-	//	break;
-
 		// kursor w lewo
 	case GLUT_KEY_LEFT:
-		rotatey -= 1;
-		break;
-
-		// kursor w górę
-	case GLUT_KEY_UP:
-		rotatex -= 1;
+		light_rotatey -= 5;
 		break;
 
 		// kursor w prawo
 	case GLUT_KEY_RIGHT:
-		rotatey += 1;
+		light_rotatey += 5;
 		break;
 
 		// kursor w dół
 	case GLUT_KEY_DOWN:
-		rotatex += 1;
+		light_rotatex += 5;
 		break;
+
+		// kursor w górę
+	case GLUT_KEY_UP:
+		light_rotatex -= 5;
+		break;
+
+		/* //kursor w lewo
+	case GLUT_KEY_LEFT:
+		rotatey -= 1;
+		break;
+
+		 //kursor w górę
+	case GLUT_KEY_UP:
+		rotatex -= 1;
+		break;
+
+		 //kursor w prawo
+	case GLUT_KEY_RIGHT:
+		rotatey += 1;
+		break;
+
+		 //kursor w dół
+	case GLUT_KEY_DOWN:
+		rotatex += 1;
+		break;*/
 
 	}
 
