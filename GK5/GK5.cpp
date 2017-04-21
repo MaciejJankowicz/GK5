@@ -413,134 +413,57 @@ void DisplayScene()
 
 		glBegin(GL_TRIANGLES);
 
-		// Podstawa piramidy - dwa trójkąty
+		// Podstawa piramidy -trzy trójkąty
 
 		glNormal3f(0.0f, -1.0f, 0.0f);
 
-		//glTexCoord2f(1.0f, 1.0f);
-
 		glVertex3fv(vCorners[2]);
-
-		//glTexCoord2f(0.0f, 0.0f);
-
 		glVertex3fv(vCorners[4]);
-
-		//glTexCoord2f(0.0f, 1.0f);
-
 		glVertex3fv(vCorners[1]);
 
-		//glTexCoord2f(1.0f, 1.0f);
-
 		glVertex3fv(vCorners[2]);
-
-		//glTexCoord2f(1.0f, 0.0f);
-
 		glVertex3fv(vCorners[3]);
-
-		//glTexCoord2f(0.0f, 0.0f);
-
 		glVertex3fv(vCorners[4]);
-
-		//
-
-		//glTexCoord2f(1.0f, 1.0f);
 
 		glVertex3fv(vCorners[1]);
-
-		//glTexCoord2f(1.0f, 0.0f);
-
 		glVertex3fv(vCorners[4]);
-
-		//glTexCoord2f(0.0f, 0.0f);
-
 		glVertex3fv(vCorners[5]);
 
 
 		// Przednia strona 3 4
 		gltGetNormalVector(vCorners[0], vCorners[4], vCorners[3], vNormal);
-
 		glNormal3fv(vNormal);
-
-		//glTexCoord2f(0.5f, 1.0f);
-
 		glVertex3fv(vCorners[0]);
-
-		//glTexCoord2f(0.0f, 0.0f);
-
 		glVertex3fv(vCorners[4]);
-
-		//glTexCoord2f(1.0f, 0.0f);
-
 		glVertex3fv(vCorners[3]);
 
+		// 1 2
 		gltGetNormalVector(vCorners[0], vCorners[2], vCorners[1], vNormal);
-
 		glNormal3fv(vNormal);
-
-		//glTexCoord2f(0.5f, 1.0f);
-
 		glVertex3fv(vCorners[0]);
-
-		//glTexCoord2f(0.0f, 0.0f);
-
 		glVertex3fv(vCorners[2]);
-
-		//glTexCoord2f(1.0f, 0.0f);
-
 		glVertex3fv(vCorners[1]);
 
 		// Prawa strona 2 3
-
 		gltGetNormalVector(vCorners[0], vCorners[3], vCorners[2], vNormal);
-
 		glNormal3fv(vNormal);
-
-		//glTexCoord2f(0.5f, 1.0f);
-
 		glVertex3fv(vCorners[0]);
-
-		//glTexCoord2f(0.0f, 0.0f);
-
 		glVertex3fv(vCorners[3]);
-
-		//glTexCoord2f(1.0f, 0.0f);
-
 		glVertex3fv(vCorners[2]);
 
 		// 4 5
-
 		gltGetNormalVector(vCorners[0], vCorners[5], vCorners[4], vNormal);
-
 		glNormal3fv(vNormal);
-
-		//glTexCoord2f(0.5f, 1.0f);
-
 		glVertex3fv(vCorners[0]);
-
-		//glTexCoord2f(0.0f, 0.0f);
-
 		glVertex3fv(vCorners[5]);
-
-		//glTexCoord2f(1.0f, 0.0f);
-
 		glVertex3fv(vCorners[4]);
 
 		// 5 1
 
 		gltGetNormalVector(vCorners[0], vCorners[1], vCorners[5], vNormal);
-
 		glNormal3fv(vNormal);
-
-		//glTexCoord2f(0.5f, 1.0f);
-
 		glVertex3fv(vCorners[0]);
-
-		//glTexCoord2f(0.0f, 0.0f);
-
 		glVertex3fv(vCorners[1]);
-
-		//glTexCoord2f(1.0f, 0.0f);
-
 		glVertex3fv(vCorners[5]);
 
 		//
