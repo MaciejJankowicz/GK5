@@ -67,7 +67,10 @@ enum
 													// światło
 													AMBIENT,
 													DIRECTIONAL,
-													SPOT
+													SPOT,
+														// wektory normalne
+														NORMALS_SMOOTH,
+														NORMALS_FLAT
 };
 
 // aspekt obrazu
@@ -135,6 +138,11 @@ GLfloat spotLight_position[4] =
 GLfloat light_rotatex = 0.0;
 GLfloat light_rotatey = 0.0;
 
+
+bool isSmooth = false;
+// wskaźnik dostępności rozszerzenia EXT_rescale_normal
+bool rescale_normal = false;
+
 // kierunek reflektora
 
 GLfloat spot_direction[3] =
@@ -177,6 +185,56 @@ GLfloat ambient_false[4] =
 	0.0,0.0,0.0,1.0
 };
 
+
+GLfloat vertex[6 * 3];
+int triangles[8 * 3] =
+{
+	0, 1, 2,
+	0, 2, 3,
+	0, 3, 4,
+	0, 4, 5,
+	0, 5, 1,
+	2, 4, 1,
+	2, 3, 4,
+	1, 4, 5
+};
+
+
+// obliczanie wektora normalnego dla wybranej ściany
+
+void Normal(GLfloat *n, int i)
+{
+	GLfloat v1[3], v2[3];
+
+	// obliczenie wektorów na podstawie współrzędnych wierzchołków trójkątów
+	v1[0] = vertex[3 * triangles[3 * i + 1] + 0] - vertex[3 * triangles[3 * i + 0] + 0];
+	v1[1] = vertex[3 * triangles[3 * i + 1] + 1] - vertex[3 * triangles[3 * i + 0] + 1];
+	v1[2] = vertex[3 * triangles[3 * i + 1] + 2] - vertex[3 * triangles[3 * i + 0] + 2];
+	v2[0] = vertex[3 * triangles[3 * i + 2] + 0] - vertex[3 * triangles[3 * i + 1] + 0];
+	v2[1] = vertex[3 * triangles[3 * i + 2] + 1] - vertex[3 * triangles[3 * i + 1] + 1];
+	v2[2] = vertex[3 * triangles[3 * i + 2] + 2] - vertex[3 * triangles[3 * i + 1] + 2];
+
+	// obliczenie waktora normalnego przy pomocy iloczynu wektorowego
+	n[0] = v1[1] * v2[2] - v1[2] * v2[1];
+	n[1] = v1[2] * v2[0] - v1[0] * v2[2];
+	n[2] = v1[0] * v2[1] - v1[1] * v2[0];
+}
+
+// normalizacja wektora
+
+void Normalize(GLfloat *v)
+{
+	// obliczenie długości wektora
+	GLfloat d = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+
+	// normalizacja wektora
+	if (d)
+	{
+		v[0] /= d;
+		v[1] /= d;
+		v[2] /= d;
+	}
+}
 
 // funkcja rysująca napis w wybranym miejscu
 // (wersja korzystająca z funkcji glWindowPos2i)
@@ -322,13 +380,21 @@ void DisplayScene()
 	float R = 0.707;
 	switch (object)
 	{
-	case PYRAMID:		
+	case PYRAMID:
+		if (rescale_normal == true)
+			glEnable(GL_RESCALE_NORMAL);
+		else
+			glEnable(GL_NORMALIZE);
+
 		float x, y;
 		GLTVector3 vNormal;
 		GLTVector3 vCorners[6];
 		vCorners[0][2] = 0.0f;
+		vertex[0] = 0.0f;
 		vCorners[0][1] = 0.8f;
+		vertex[1] = 0.8f;
 		vCorners[0][0] = 0.0f;
+		vertex[2] = 0.0f;
 		for (int k = 0; k < n; k++)
 		{
 			x = R * cos((M_PI / 2 + 2 * M_PI*k) / n);
@@ -336,6 +402,10 @@ void DisplayScene()
 			vCorners[k + 1][2] = y;
 			vCorners[k + 1][1] = 0.0f;
 			vCorners[k + 1][0] = x;
+
+			vertex[3*(k + 1)] = x;
+			vertex[3 * (k + 1) + 1] = 0.0f;
+			vertex[3 * (k + 1) + 2] = y;
 
 		}
 
@@ -385,8 +455,8 @@ void DisplayScene()
 
 		glVertex3fv(vCorners[5]);
 
-		// Przednia strona 3 4
 
+		// Przednia strona 3 4
 		gltGetNormalVector(vCorners[0], vCorners[4], vCorners[3], vNormal);
 
 		glNormal3fv(vNormal);
@@ -1015,6 +1085,18 @@ void Menu(int value)
 		DisplayScene();
 		break;
 
+		// wektory normalne - GLU_SMOOTH
+	case NORMALS_SMOOTH:
+		isSmooth = true;
+		DisplayScene();
+		break;
+
+		// wektory normalne - GLU_FLAT
+	case NORMALS_FLAT:
+		isSmooth = false;
+		DisplayScene();
+		break;
+
 		// wyjście
 	case EXIT:
 		exit(0);
@@ -1041,6 +1123,14 @@ void ExtensionSetup()
 
 		exit(0);
 	}
+
+	// sprawdzenie czy jest co najmniej wersja 1.2
+	if (major > 1 || minor >= 2)
+		rescale_normal = true;
+	else
+		// sprawdzenie czy jest obsługiwane rozszerzenie EXT_rescale_normal
+		if (glutExtensionSupported("GL_EXT_rescale_normal"))
+			rescale_normal = true;
 
 	// sprawdzenie czy jest co najmniej wersja 1.4
 	if (major > 1 || minor >= 4)
@@ -1106,7 +1196,7 @@ int main(int argc, char *argv[])
 	glutCreateMenu(Menu);
 
 	// utworzenie podmenu - obiekt
-	int MenuObject = glutCreateMenu(Menu);
+	/*int MenuObject = glutCreateMenu(Menu);
 	glutAddMenuEntry("Piramida", PYRAMID);
 	glutAddMenuEntry("Czajnik", TEAPOT);
 	glutAddMenuEntry("Kula", SPHERE);
@@ -1129,7 +1219,7 @@ int main(int argc, char *argv[])
 	glutAddMenuEntry("Osmioscian", OCTAHEDRON);
 	glutAddMenuEntry("Czworoscian", TETRAHEDRON);
 	glutAddMenuEntry("Dwudziestoscian", ICOSAHEDRON);
-#endif
+#endif*/
 
 	// utworzenie podmenu - Materiał
 	int MenuMaterial = glutCreateMenu(Menu);
@@ -1195,10 +1285,19 @@ int main(int argc, char *argv[])
 	glutAddMenuEntry("Kierunkowe", DIRECTIONAL);
 	glutAddMenuEntry("Reflektor", SPOT);
 
+	// utworzenie podmenu - Wektory normalne
+	int MenuNormals = glutCreateMenu(Menu);
+#ifndef WIN32
+	glutAddMenuEntry("Jeden wektor normalny na wierzcholek", NORMALS_SMOOTH);
+	glutAddMenuEntry("Jeden wektor normalny na sciane", NORMALS_FLAT);
+#else
+	glutAddMenuEntry("Jeden wektor normalny na wierzchołek", NORMALS_SMOOTH);
+	glutAddMenuEntry("Jeden wektor normalny na ścianę", NORMALS_FLAT);
+#endif
 
 	// menu główne
 	glutCreateMenu(Menu);
-	glutAddSubMenu("Obiekt", MenuObject);
+	/*glutAddSubMenu("Obiekt", MenuObject);*/
 
 #ifdef WIN32
 
@@ -1211,6 +1310,8 @@ int main(int argc, char *argv[])
 	glutAddSubMenu("Aspekt obrazu", MenuAspect);
 	//
 	glutAddSubMenu("Oswietlenie", MenuLight);
+
+	glutAddSubMenu("Wektory normalne", MenuNormals);
 	//
 #ifdef WIN32
 
